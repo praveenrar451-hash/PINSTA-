@@ -12,7 +12,6 @@
     </nav>
 
     <div class="container">
-        <!-- Feed Section -->
         <div class="feed-section">
             <% if (posts.length === 0) { %>
                 <p class="no-posts">No posts yet.</p>
@@ -35,10 +34,9 @@
                             </div>
                             <button class="save-btn">🔖</button>
                         </div>
-                        <div class="post-likes"><%= post.likes %> likes</div>
+                        <div class="post-likes"><%= post.likes.length %> likes</div>
                         <div class="post-text"><a href="/profile/<%= post.username %>">@<%= post.username %></a> <%= post.content %></div>
 
-                        <!-- Comments -->
                         <div class="comments-section">
                             <% post.comments.forEach(c => { %>
                                 <div class="comment-item"><a href="/profile/<%= c.username %>">@<%= c.username %></a> <%= c.text %></div>
@@ -54,7 +52,6 @@
         </div>
     </div>
 
-    <!-- Post Upload Modal -->
     <div id="postModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">&times;</span>
@@ -67,7 +64,6 @@
         </div>
     </div>
 
-    <!-- Search Modal Overlay -->
     <div id="searchModal" class="search-modal">
         <div class="search-header">
             <input type="text" id="searchInput" placeholder="Search username..." onkeyup="performSearch()">
@@ -76,11 +72,11 @@
         <div id="searchResults" class="search-results-list"></div>
     </div>
 
-    <!-- Instagram Bottom Navigation Bar -->
     <div class="bottom-nav">
         <a href="/feed" class="nav-item active">🏠</a>
         <button class="nav-item" onclick="openSearch()">🔍</button>
         <button class="nav-item" onclick="openModal()">➕</button>
+        <a href="/chat" class="nav-item">💬</a>
         <a href="/profile/<%= user.username %>" class="nav-item">👤</a>
     </div>
 
@@ -106,11 +102,6 @@
                 });
                 document.getElementById('searchResults').innerHTML = html;
             });
-        }
-
-        window.onclick = function(event) {
-            let modal = document.getElementById('postModal');
-            if (event.target == modal) modal.style.display = 'none';
         }
     </script>
 </body>
