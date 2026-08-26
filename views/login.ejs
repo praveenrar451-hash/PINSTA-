@@ -4,19 +4,29 @@
     <meta charset="UTF-8">
     <title>Login • PINSTA</title>
     <link rel="stylesheet" href="/style.css">
+    <style>
+        body { background: #000; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: sans-serif; }
+        .auth-container { width: 320px; padding: 30px; border: 1px solid #262626; border-radius: 4px; background: #000; text-align: center; }
+        .auth-container h2 { font-family: cursive; margin-bottom: 25px; letter-spacing: 2px; }
+        .auth-container input { width: 100%; padding: 10px 12px; margin-bottom: 10px; background: #121212; border: 1px solid #363636; border-radius: 4px; color: #fff; font-size: 12px; box-sizing: border-box; outline: none; }
+        .auth-container button { width: 100%; padding: 10px; background: #0095f6; color: #fff; border: none; border-radius: 4px; font-weight: bold; font-size: 14px; cursor: pointer; margin-top: 5px; }
+        .auth-container p { font-size: 12px; color: #888; margin-top: 20px; }
+        .auth-container a { color: #0095f6; text-decoration: none; font-weight: bold; }
+        .error-msg { color: #ed4956; font-size: 12px; margin-bottom: 15px; }
+    </style>
 </head>
-<body class="auth-body">
-    <div class="auth-card">
-        <h1>PINSTA</h1>
+<body>
+    <div class="auth-container">
+        <h2>PINSTA</h2>
         <% if (error) { %>
-            <p class="error-msg"><%= error %></p>
-        <% } %>
+            <div class="error-msg"><%= error %></div>
+        <% %>
         <form action="/login" method="POST">
-            <input type="text" name="username" placeholder="Phone number, username, or email" required>
+            <input type="text" name="username" placeholder="Username" required autocomplete="off">
             <input type="password" name="password" placeholder="Password" required>
-            <button type="submit">Log in</button>
+            <button type="submit">Log In</button>
         </form>
-        <p class="switch-link">Don't have an account? <a href="/signup">Sign up</a></p>
+        <p>Don't have an account? <a href="/signup">Sign up</a></p>
     </div>
 </body>
 </html>
