@@ -12,7 +12,6 @@
     </nav>
 
     <div class="container" style="max-width: 600px;">
-        <!-- Profile Header -->
         <div class="profile-header">
             <div class="profile-avatar">👤</div>
             <div class="profile-info">
@@ -32,7 +31,6 @@
             </div>
         </div>
 
-        <!-- User Posts Grid -->
         <div class="profile-grid">
             <% if (posts.length === 0) { %>
                 <p class="no-posts" style="grid-column: span 3;">No posts yet.</p>
@@ -48,7 +46,6 @@
         </div>
     </div>
 
-    <!-- Post Upload Modal -->
     <div id="postModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">&times;</span>
@@ -61,7 +58,6 @@
         </div>
     </div>
 
-    <!-- Search Modal Overlay -->
     <div id="searchModal" class="search-modal">
         <div class="search-header">
             <input type="text" id="searchInput" placeholder="Search username..." onkeyup="performSearch()">
@@ -70,11 +66,11 @@
         <div id="searchResults" class="search-results-list"></div>
     </div>
 
-    <!-- Instagram Bottom Navigation Bar -->
     <div class="bottom-nav">
         <a href="/feed" class="nav-item">🏠</a>
         <button class="nav-item" onclick="openSearch()">🔍</button>
         <button class="nav-item" onclick="openModal()">➕</button>
+        <a href="/chat" class="nav-item">💬</a>
         <a href="/profile/<%= loggedInUser.username %>" class="nav-item active">👤</a>
     </div>
 
