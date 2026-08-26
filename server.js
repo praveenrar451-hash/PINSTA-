@@ -137,8 +137,40 @@ app.post('/comment/:id', isAuthenticated, (req, res) => {
   }
 });
 
+// --- Naye Chat Routes ---
 app.get('/chat', isAuthenticated, (req, res) => {
-  res.render('chat', { user: req.session.user });
+  db.getChatsList(req.session.user.username, (err, chatUsers) => {
+    res.render('chat', { 
+      user: req.session.user, 
+      chatUsers: chatUsers || [], 
+      activeChatUser: null, 
+      messages: [] 
+    });
+  });
+});
+
+app.get('/chat/:username', isAuthenticated, (req, res) => {
+  const targetUsername = req.params.username;
+  db.getChatsList(req.session.user.username, (err, chatUsers) => {
+    db.getChatHistory(req.session.user.username, targetUsername, (err, history) => {
+      res.render('chat', { 
+        user: req.session.user, 
+        chatUsers: chatUsers || [], 
+        activeChatUser: targetUsername, 
+        messages: history || [] 
+      });
+    });
+  });
+});
+
+app.post('/chat/:username', isAuthenticated, (req, res) => {
+  const receiver = req.params.username;
+  const { text } = req.body;
+  if (!text || text.trim() === '') return res.redirect('/chat/' + receiver);
+
+  db.sendMessage(req.session.user.username, receiver, text, () => {
+    res.redirect('/chat/' + receiver);
+  });
 });
 
 app.get('/logout', (req, res) => {
