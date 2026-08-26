@@ -114,6 +114,9 @@ const database = {
     const targetUser = db.users.find(u => u.username === targetUsername);
 
     if (currentUser && targetUser && currentUsername !== targetUsername) {
+      if (!currentUser.following) currentUser.following = [];
+      if (!targetUser.followers) targetUser.followers = [];
+
       const isFollowing = currentUser.following.includes(targetUsername);
       if (isFollowing) {
         currentUser.following = currentUser.following.filter(u => u !== targetUsername);
@@ -155,7 +158,10 @@ const database = {
     const user = db.users.find(u => u.username === username);
     if (!user) return callback(null, []);
 
-    const connectedUsernames = [...new Set([...user.following, ...user.followers])];
+    const following = user.following || [];
+    const followers = user.followers || [];
+    const connectedUsernames = [...new Set([...following, ...followers])];
+
     const chatUsers = db.users.filter(u => connectedUsernames.includes(u.username));
     callback(null, chatUsers);
   }
