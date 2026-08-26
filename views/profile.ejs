@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>@<%= profileUser.username %> • PINSTA</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <h2>@<%= profileUser.username %></h2>
+        <a href="/logout" style="color: #ed4956; text-decoration: none; font-size: 13px; font-weight: 600;">Logout</a>
+    </nav>
+
+    <div class="container" style="max-width: 600px;">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-avatar">👤</div>
+            <div class="profile-info">
+                <h3>@<%= profileUser.username %></h3>
+                <div class="profile-stats">
+                    <span><b><%= posts.length %></b> posts</span>
+                    <span><b><%= profileUser.followers.length %></b> followers</span>
+                    <span><b><%= profileUser.following.length %></b> following</span>
+                </div>
+                <% if (loggedInUser.username !== profileUser.username) { %>
+                    <form action="/follow/<%= profileUser.username %>" method="POST">
+                        <button type="submit" class="follow-btn">
+                            <%= profileUser.followers.includes(loggedInUser.username) ? 'Following' : 'Follow' %>
+                        </button>
+                    </form>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- User Posts Grid -->
+        <div class="profile-grid">
+            <% if (posts.length === 0) { %>
+                <p class="no-posts" style="grid-column: span 3;">No posts yet.</p>
+            <% } else { %>
+                <% posts.forEach(post => { %>
+                    <div class="grid-item">
+                        <% if (post.image_url) { %>
+                            <img src="<%= post.image_url %>" alt="Post">
+                        <% } %>
+                    </div>
+                <% }) %>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Post Upload Modal -->
+    <div id="postModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h3 style="margin-bottom: 15px; font-size: 18px;">Create New Post</h3>
+            <form action="/post" method="POST" enctype="multipart/form-data">
+                <input type="file" name="image" accept="image/*" required style="margin-bottom: 12px; color: #fff;">
+                <input type="text" name="content" placeholder="Write a caption..." required>
+                <button type="submit">Share Post</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Search Modal Overlay -->
+    <div id="searchModal" class="search-modal">
+        <div class="search-header">
+            <input type="text" id="searchInput" placeholder="Search username..." onkeyup="performSearch()">
+            <button onclick="closeSearch()" style="background:none; border:none; color:#fff; font-size:16px;">Cancel</button>
+        </div>
+        <div id="searchResults" class="search-results-list"></div>
+    </div>
+
+    <!-- Instagram Bottom Navigation Bar -->
+    <div class="bottom-nav">
+        <a href="/feed" class="nav-item">🏠</a>
+        <button class="nav-item" onclick="openSearch()">🔍</button>
+        <button class="nav-item" onclick="openModal()">➕</button>
+        <a href="/profile/<%= loggedInUser.username %>" class="nav-item active">👤</a>
+    </div>
+
+    <script>
+        function openModal() { document.getElementById('postModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('postModal').style.display = 'none'; }
+        
+        function openSearch() { document.getElementById('searchModal').style.display = 'flex'; document.getElementById('searchInput').focus(); }
+        function closeSearch() { document.getElementById('searchModal').style.display = 'none'; }
+
+        function performSearch() {
+            let query = document.getElementById('searchInput').value;
+            if(query.trim() === '') {
+                document.getElementById('searchResults').innerHTML = '';
+                return;
+            }
+            fetch('/search?q=' + query)
+            .then(res => res.json())
+            .then(users => {
+                let html = '';
+                users.forEach(u => {
+                    html += `<a href="/profile/${u.username}" class="user-search-item"><b>@${u.username}</b></a>`;
+                });
+                document.getElementById('searchResults').innerHTML = html;
+            });
+        }
+    </script>
+</body>
+</html>
