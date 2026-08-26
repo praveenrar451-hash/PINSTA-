@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign up • PINSTA</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body class="auth-body">
+    <div class="auth-card">
+        <h1>PINSTA</h1>
+        <p style="color: #a8a8a8; font-size: 14px; margin-bottom: 15px; font-weight: 600;">Sign up to see photos from your friends.</p>
+        <% if (error) { %>
+            <p class="error-msg"><%= error %></p>
+        <% } %>
+        <form action="/signup" method="POST">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="text" name="email_or_phone" placeholder="Email or Mobile Number" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Sign up</button>
+        </form>
+        <p class="switch-link">Have an account? <a href="/login">Log in</a></p>
+    </div>
+</body>
+</html>
