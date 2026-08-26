@@ -4,14 +4,9 @@ const bcrypt = require('bcrypt');
 const path = require('path');
 const multer = require('multer');
 const fs = require('fs');
-const http = require('http');
-const { Server } = require('socket.io');
 const db = require('./database');
 
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
-
 const PORT = process.env.PORT || 3000;
 
 app.set('trust proxy', 1);
@@ -146,9 +141,9 @@ app.post('/comment/:id', isAuthenticated, (req, res) => {
 app.get('/chat', isAuthenticated, (req, res) => {
   db.getChatsList(req.session.user.username, (err, chatUsers) => {
     res.render('chat', { 
-      loggedInUser: req.session.user, 
+      user: req.session.user, 
       chatUsers: chatUsers || [], 
-      activeUser: null, 
+      activeChatUser: null, 
       messages: [] 
     });
   });
@@ -157,33 +152,24 @@ app.get('/chat', isAuthenticated, (req, res) => {
 app.get('/chat/:username', isAuthenticated, (req, res) => {
   const targetUsername = req.params.username;
   db.getChatsList(req.session.user.username, (err, chatUsers) => {
-    db.findUserByUsername(targetUsername, (err2, targetUser) => {
-      if (!targetUser) return res.redirect('/chat');
-      db.getChatHistory(req.session.user.username, targetUsername, (err3, history) => {
-        res.render('chat', { 
-          loggedInUser: req.session.user, 
-          chatUsers: chatUsers || [], 
-          activeUser: targetUser, 
-          messages: history || [] 
-        });
+    db.getChatHistory(req.session.user.username, targetUsername, (err, history) => {
+      res.render('chat', { 
+        user: req.session.user, 
+        chatUsers: chatUsers || [], 
+        activeChatUser: targetUsername, 
+        messages: history || [] 
       });
     });
   });
 });
 
-// --- Socket.io Realtime Chat ---
-io.on('connection', (socket) => {
-  socket.on('joinRoom', ({ sender, receiver }) => {
-    socket.join(sender);
-  });
+app.post('/chat/:username', isAuthenticated, (req, res) => {
+  const receiver = req.params.username;
+  const { text } = req.body;
+  if (!text || text.trim() === '') return res.redirect('/chat/' + receiver);
 
-  socket.on('privateMessage', ({ sender, receiver, text }) => {
-    db.sendMessage(sender, receiver, text, (err, savedMsg) => {
-      if (!err && savedMsg) {
-        io.to(sender).emit('privateMessage', savedMsg);
-        io.to(receiver).emit('privateMessage', savedMsg);
-      }
-    });
+  db.sendMessage(req.session.user.username, receiver, text, () => {
+    res.redirect('/chat/' + receiver);
   });
 });
 
@@ -191,4 +177,4 @@ app.get('/logout', (req, res) => {
   req.session.destroy(() => res.redirect('/login'));
 });
 
-server.listen(PORT, () => console.log(`PINSTA running on port ${PORT}`));
+app.listen(PORT, () => console.log(`PINSTA running on port ${PORT}`));
