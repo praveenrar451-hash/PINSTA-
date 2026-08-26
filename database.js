@@ -3,18 +3,13 @@ const path = require('path');
 
 const dbFile = path.join(__dirname, 'database.json');
 
-// Initialize database file if not exists
-if (!fs.existsSync(dbFile)) {
-  const initialData = {
-    users: [],
-    posts: [],
-    messages: []
-  };
-  fs.writeFileSync(dbFile, JSON.stringify(initialData, null, 2));
-}
-
 function readDB() {
   try {
+    if (!fs.existsSync(dbFile)) {
+      const initialData = { users: [], posts: [], messages: [] };
+      fs.writeFileSync(dbFile, JSON.stringify(initialData, null, 2));
+      return initialData;
+    }
     const data = fs.readFileSync(dbFile, 'utf8');
     return JSON.parse(data);
   } catch (err) {
@@ -23,19 +18,23 @@ function readDB() {
 }
 
 function writeDB(data) {
-  fs.writeFileSync(dbFile, JSON.stringify(data, null, 2));
+  try {
+    fs.writeFileSync(dbFile, JSON.stringify(data, null, 2));
+  } catch (err) {
+    console.error("Write error:", err);
+  }
 }
 
 const database = {
   findUserByUsername: (username, callback) => {
     const db = readDB();
-    const user = db.users.find(u => u.username.toLowerCase() === username.toLowerCase());
+    const user = db.users.find(u => u.username && u.username.toLowerCase() === username.toLowerCase());
     callback(null, user || null);
   },
 
   searchUsers: (query, callback) => {
     const db = readDB();
-    const users = db.users.filter(u => u.username.toLowerCase().includes(query.toLowerCase()));
+    const users = db.users.filter(u => u.username && u.username.toLowerCase().includes(query.toLowerCase()));
     callback(null, users);
   },
 
@@ -62,7 +61,7 @@ const database = {
 
   getPostsByUsername: (username, callback) => {
     const db = readDB();
-    const posts = db.posts.filter(p => p.username.toLowerCase() === username.toLowerCase()).reverse();
+    const posts = db.posts.filter(p => p.username && p.username.toLowerCase() === username.toLowerCase()).reverse();
     callback(null, posts);
   },
 
@@ -87,6 +86,7 @@ const database = {
     const db = readDB();
     const post = db.posts.find(p => p.id == postId);
     if (post) {
+      if (!post.likes) post.likes = [];
       const index = post.likes.indexOf(username);
       if (index > -1) {
         post.likes.splice(index, 1);
@@ -102,6 +102,7 @@ const database = {
     const db = readDB();
     const post = db.posts.find(p => p.id == postId);
     if (post) {
+      if (!post.comments) post.comments = [];
       post.comments.push({ username, text });
       writeDB(db);
     }
