@@ -1,5 +1,6 @@
 let users = [];
 let posts = [];
+let messages = []; // Naya array messages store karne ke liye
 
 const db = {
   findUserByUsername: (username, callback) => {
@@ -41,7 +42,7 @@ const db = {
     const newPost = { 
       id: Date.now(), 
       ...postObj, 
-      likes: [], // Array of usernames who liked
+      likes: [], 
       comments: [],
       created_at: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString() 
     };
@@ -55,9 +56,9 @@ const db = {
       if (!post.likes) post.likes = [];
       const index = post.likes.indexOf(username);
       if (index > -1) {
-        post.likes.splice(index, 1); // Unlike
+        post.likes.splice(index, 1);
       } else {
-        post.likes.push(username); // Like
+        post.likes.push(username);
       }
     }
     callback(null);
@@ -86,6 +87,38 @@ const db = {
       }
     }
     callback(null);
+  },
+
+  // --- Naye Chat Functions ---
+  sendMessage: (sender, receiver, text, callback) => {
+    const newMessage = {
+      id: Date.now(),
+      sender,
+      receiver,
+      text,
+      created_at: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    messages.push(newMessage);
+    callback(null, newMessage);
+  },
+
+  getChatHistory: (user1, user2, callback) => {
+    const chat = messages.filter(m => 
+      (m.sender === user1 && m.receiver === user2) || 
+      (m.sender === user2 && m.receiver === user1)
+    );
+    callback(null, chat);
+  },
+
+  getChatsList: (username, callback) => {
+    const user = users.find(u => u.username === username);
+    if (!user) return callback(null, []);
+
+    // Jo log followers ya following mein hain, unki list nikalna
+    const connectedUsernames = [...new Set([...user.following, ...user.followers])];
+    const chatUsers = users.filter(u => connectedUsernames.includes(u.username));
+    
+    callback(null, chatUsers);
   }
 };
 
