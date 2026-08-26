@@ -4,6 +4,21 @@
     <meta charset="UTF-8">
     <title>Chats • PINSTA</title>
     <link rel="stylesheet" href="/style.css">
+    <style>
+        .chat-container { display: flex; height: calc(100vh - 125px); max-width: 650px; margin: 10px auto; border: 1px solid #262626; border-radius: 8px; background: #000; overflow: hidden; }
+        .chat-sidebar { width: 40%; border-right: 1px solid #262626; overflow-y: auto; }
+        .chat-main { width: 60%; display: flex; flex-direction: column; justify-content: space-between; background: #000; }
+        .chat-user-item { display: flex; align-items: center; padding: 12px 15px; border-bottom: 1px solid #1a1a1a; text-decoration: none; color: #fff; gap: 10px; }
+        .chat-user-item:hover, .chat-user-item.active { background: #1a1a1a; }
+        .avatar-sm { width: 38px; height: 38px; background: #262626; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+        .messages-box { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .msg { max-width: 70%; padding: 8px 12px; border-radius: 16px; font-size: 13px; word-wrap: break-word; }
+        .msg.sent { background: #0095f6; color: #fff; align-self: flex-end; }
+        .msg.received { background: #262626; color: #fff; align-self: flex-start; }
+        .chat-input-form { display: flex; padding: 10px 15px; background: #000; border-top: 1px solid #262626; gap: 10px; align-items: center; }
+        .chat-input-form input { flex: 1; background: #121212; border: 1px solid #363636; border-radius: 20px; padding: 10px 15px; color: #fff; font-size: 13px; outline: none; }
+        .chat-input-form button { background: none; border: none; color: #0095f6; font-weight: 600; font-size: 14px; cursor: pointer; }
+    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -11,9 +26,51 @@
         <a href="/logout" style="color: #ed4956; text-decoration: none; font-size: 13px; font-weight: 600;">Logout</a>
     </nav>
 
-    <div class="container" style="text-align: center; margin-top: 100px;">
-        <h3 style="color: #a8a8a8; font-size: 18px;">Direct Messages</h3>
-        <p style="color: #666; font-size: 14px; margin-top: 10px;">Chat system is ready. Select a user from their profile to start messaging!</p>
+    <div class="chat-container">
+        <!-- Left Sidebar: Followers/Following List -->
+        <div class="chat-sidebar">
+            <div style="padding: 15px; font-weight: bold; border-bottom: 1px solid #262626; font-size: 15px;"><%= user.username %></div>
+            <% if (chatUsers.length === 0) { %>
+                <p style="color: #888; font-size: 12px; text-align: center; padding: 20px 10px;">Follow people or get followers to chat with them!</p>
+            <% } else { %>
+                <% chatUsers.forEach(u => { %>
+                    <a href="/chat/<%= u.username %>" class="chat-user-item <%= activeChatUser === u.username ? 'active' : '' %>">
+                        <div class="avatar-sm">👤</div>
+                        <div>
+                            <b style="font-size: 13px;">@<%= u.username %></b>
+                            <p style="font-size: 11px; color: #888; margin-top: 2px;">Active chat</p>
+                        </div>
+                    </a>
+                <% }) %>
+            <% } %>
+        </div>
+
+        <!-- Right Main: Active Chat Window -->
+        <div class="chat-main">
+            <% if (!activeChatUser) { %>
+                <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #888; flex-direction: column; text-align: center; padding: 20px;">
+                    <h3 style="font-size: 16px; color: #fff; margin-bottom: 5px;">Your Messages</h3>
+                    <p style="font-size: 12px;">Send private messages to a friend from your chat list.</p>
+                </div>
+            <% } else { %>
+                <div style="padding: 12px 15px; border-bottom: 1px solid #262626; background: #000; font-size: 14px; font-weight: bold;">
+                    @<%= activeChatUser %>
+                </div>
+                
+                <div class="messages-box" id="msgBox">
+                    <% messages.forEach(m => { %>
+                        <div class="msg <%= m.sender === user.username ? 'sent' : 'received' %>">
+                            <%= m.text %>
+                        </div>
+                    <% }) %>
+                </div>
+
+                <form action="/chat/<%= activeChatUser %>" method="POST" class="chat-input-form">
+                    <input type="text" name="text" placeholder="Message..." autocomplete="off" required>
+                    <button type="submit">Send</button>
+                </form>
+            <% } %>
+        </div>
     </div>
 
     <!-- Instagram Bottom Navigation Bar -->
@@ -21,6 +78,7 @@
         <a href="/feed" class="nav-item">🏠</a>
         <button class="nav-item" onclick="openSearch()">🔍</button>
         <button class="nav-item" onclick="openModal()">➕</button>
+        <a href="/chat" class="nav-item active">💬</a>
         <a href="/profile/<%= user.username %>" class="nav-item">👤</a>
     </div>
 
@@ -47,6 +105,10 @@
     </div>
 
     <script>
+        // Auto scroll to bottom of messages
+        const msgBox = document.getElementById('msgBox');
+        if(msgBox) { msgBox.scrollTop = msgBox.scrollHeight; }
+
         function openModal() { document.getElementById('postModal').style.display = 'flex'; }
         function closeModal() { document.getElementById('postModal').style.display = 'none'; }
         
