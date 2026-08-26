@@ -8,10 +8,9 @@
 body {
     background-color: #000;
     color: #fff;
-    padding-bottom: 70px; /* Space for bottom nav */
+    padding-bottom: 70px;
 }
 
-/* Auth Pages */
 .auth-body {
     display: flex;
     justify-content: center;
@@ -76,7 +75,6 @@ body {
     font-weight: 600;
 }
 
-/* Top Navbar */
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -94,7 +92,6 @@ body {
     font-family: cursive;
 }
 
-/* Bottom Instagram Navigation Bar */
 .bottom-nav {
     position: fixed;
     bottom: 0;
@@ -125,7 +122,6 @@ body {
     color: #0095f6;
 }
 
-/* Search Overlay Modal */
 .search-modal {
     display: none;
     position: fixed;
@@ -174,14 +170,12 @@ body {
     font-size: 15px;
 }
 
-/* Container & Feed */
 .container {
     max-width: 470px;
     margin: 15px auto;
     padding: 0 10px;
 }
 
-/* Upload Modal */
 .modal {
     display: none;
     position: fixed;
@@ -234,7 +228,6 @@ body {
     cursor: pointer;
 }
 
-/* Post Card */
 .post-card {
     background: #000;
     border: 1px solid #262626;
@@ -305,7 +298,6 @@ body {
     margin-right: 5px;
 }
 
-/* Comments */
 .comments-section {
     padding: 0 15px 12px 15px;
 }
@@ -346,7 +338,6 @@ body {
     cursor: pointer;
 }
 
-/* Profile Page */
 .profile-header {
     display: flex;
     align-items: center;
