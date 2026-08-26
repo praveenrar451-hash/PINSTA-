@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chats • PINSTA</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <h2>Messages</h2>
+        <a href="/logout" style="color: #ed4956; text-decoration: none; font-size: 13px; font-weight: 600;">Logout</a>
+    </nav>
+
+    <div class="container" style="text-align: center; margin-top: 100px;">
+        <h3 style="color: #a8a8a8; font-size: 18px;">Direct Messages</h3>
+        <p style="color: #666; font-size: 14px; margin-top: 10px;">Chat system is ready. Select a user from their profile to start messaging!</p>
+    </div>
+
+    <!-- Instagram Bottom Navigation Bar -->
+    <div class="bottom-nav">
+        <a href="/feed" class="nav-item">🏠</a>
+        <button class="nav-item" onclick="openSearch()">🔍</button>
+        <button class="nav-item" onclick="openModal()">➕</button>
+        <a href="/profile/<%= user.username %>" class="nav-item">👤</a>
+    </div>
+
+    <!-- Post Upload Modal -->
+    <div id="postModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h3 style="margin-bottom: 15px; font-size: 18px;">Create New Post</h3>
+            <form action="/post" method="POST" enctype="multipart/form-data">
+                <input type="file" name="image" accept="image/*" required style="margin-bottom: 12px; color: #fff;">
+                <input type="text" name="content" placeholder="Write a caption..." required>
+                <button type="submit">Share Post</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Search Modal Overlay -->
+    <div id="searchModal" class="search-modal">
+        <div class="search-header">
+            <input type="text" id="searchInput" placeholder="Search username..." onkeyup="performSearch()">
+            <button onclick="closeSearch()" style="background:none; border:none; color:#fff; font-size:16px;">Cancel</button>
+        </div>
+        <div id="searchResults" class="search-results-list"></div>
+    </div>
+
+    <script>
+        function openModal() { document.getElementById('postModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('postModal').style.display = 'none'; }
+        
+        function openSearch() { document.getElementById('searchModal').style.display = 'flex'; document.getElementById('searchInput').focus(); }
+        function closeSearch() { document.getElementById('searchModal').style.display = 'none'; }
+
+        function performSearch() {
+            let query = document.getElementById('searchInput').value;
+            if(query.trim() === '') {
+                document.getElementById('searchResults').innerHTML = '';
+                return;
+            }
+            fetch('/search?q=' + query)
+            .then(res => res.json())
+            .then(users => {
+                let html = '';
+                users.forEach(u => {
+                    html += `<a href="/profile/${u.username}" class="user-search-item"><b>@${u.username}</b></a>`;
+                });
+                document.getElementById('searchResults').innerHTML = html;
+            });
+        }
+    </script>
+</body>
+</html>
