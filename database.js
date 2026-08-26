@@ -1,80 +1,117 @@
-let users = [];
-let posts = [];
-let messages = []; // Naya array messages store karne ke liye
+const fs = require('fs');
+const path = require('path');
 
-const db = {
+const dbFile = path.join(__dirname, 'database.json');
+
+// Initialize database file if not exists
+if (!fs.existsSync(dbFile)) {
+  const initialData = {
+    users: [],
+    posts: [],
+    messages: []
+  };
+  fs.writeFileSync(dbFile, JSON.stringify(initialData, null, 2));
+}
+
+function readDB() {
+  try {
+    const data = fs.readFileSync(dbFile, 'utf8');
+    return JSON.parse(data);
+  } catch (err) {
+    return { users: [], posts: [], messages: [] };
+  }
+}
+
+function writeDB(data) {
+  fs.writeFileSync(dbFile, JSON.stringify(data, null, 2));
+}
+
+const database = {
   findUserByUsername: (username, callback) => {
-    const user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
-    callback(null, user);
+    const db = readDB();
+    const user = db.users.find(u => u.username.toLowerCase() === username.toLowerCase());
+    callback(null, user || null);
   },
 
   searchUsers: (query, callback) => {
-    const matched = users.filter(u => u.username.toLowerCase().includes(query.toLowerCase()));
-    callback(null, matched);
+    const db = readDB();
+    const users = db.users.filter(u => u.username.toLowerCase().includes(query.toLowerCase()));
+    callback(null, users);
   },
 
   insertUser: (userObj, callback) => {
-    const existing = users.find(u => u.username.toLowerCase() === userObj.username.toLowerCase());
-    if (existing) {
-      return callback(new Error('Username already taken'));
-    }
-    const newUser = { 
-      id: Date.now(), 
-      ...userObj, 
-      followers: [], 
-      following: [] 
+    const db = readDB();
+    const newUser = {
+      id: db.users.length > 0 ? db.users[db.users.length - 1].id + 1 : 1,
+      username: userObj.username,
+      email_or_phone: userObj.email_or_phone,
+      password: userObj.password,
+      followers: [],
+      following: []
     };
-    users.push(newUser);
+    db.users.push(newUser);
+    writeDB(db);
     callback(null, { lastID: newUser.id });
   },
 
   getAllPosts: (callback) => {
-    const sortedPosts = [...posts].reverse();
-    callback(null, sortedPosts);
+    const db = readDB();
+    const posts = [...db.posts].reverse();
+    callback(null, posts);
   },
 
   getPostsByUsername: (username, callback) => {
-    const userPosts = posts.filter(p => p.username.toLowerCase() === username.toLowerCase()).reverse();
-    callback(null, userPosts);
+    const db = readDB();
+    const posts = db.posts.filter(p => p.username.toLowerCase() === username.toLowerCase()).reverse();
+    callback(null, posts);
   },
 
   insertPost: (postObj, callback) => {
-    const newPost = { 
-      id: Date.now(), 
-      ...postObj, 
-      likes: [], 
+    const db = readDB();
+    const newPost = {
+      id: db.posts.length > 0 ? db.posts[db.posts.length - 1].id + 1 : 1,
+      user_id: postObj.user_id,
+      username: postObj.username,
+      content: postObj.content,
+      image_url: postObj.image_url,
+      likes: [],
       comments: [],
-      created_at: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString() 
+      created_at: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString()
     };
-    posts.push(newPost);
+    db.posts.push(newPost);
+    writeDB(db);
     callback(null);
   },
 
   toggleLikePost: (postId, username, callback) => {
-    const post = posts.find(p => p.id == postId);
+    const db = readDB();
+    const post = db.posts.find(p => p.id == postId);
     if (post) {
-      if (!post.likes) post.likes = [];
       const index = post.likes.indexOf(username);
       if (index > -1) {
         post.likes.splice(index, 1);
       } else {
         post.likes.push(username);
       }
+      writeDB(db);
     }
     callback(null);
   },
 
   addComment: (postId, username, text, callback) => {
-    const post = posts.find(p => p.id == postId);
+    const db = readDB();
+    const post = db.posts.find(p => p.id == postId);
     if (post) {
       post.comments.push({ username, text });
+      writeDB(db);
     }
     callback(null);
   },
 
   toggleFollow: (currentUsername, targetUsername, callback) => {
-    const currentUser = users.find(u => u.username === currentUsername);
-    const targetUser = users.find(u => u.username === targetUsername);
+    const db = readDB();
+    const currentUser = db.users.find(u => u.username === currentUsername);
+    const targetUser = db.users.find(u => u.username === targetUsername);
 
     if (currentUser && targetUser && currentUsername !== targetUsername) {
       const isFollowing = currentUser.following.includes(targetUsername);
@@ -85,41 +122,43 @@ const db = {
         currentUser.following.push(targetUsername);
         targetUser.followers.push(currentUsername);
       }
+      writeDB(db);
     }
     callback(null);
   },
 
-  // --- Naye Chat Functions ---
   sendMessage: (sender, receiver, text, callback) => {
+    const db = readDB();
     const newMessage = {
-      id: Date.now(),
+      id: db.messages.length > 0 ? db.messages[db.messages.length - 1].id + 1 : 1,
       sender,
       receiver,
       text,
       created_at: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
-    messages.push(newMessage);
+    db.messages.push(newMessage);
+    writeDB(db);
     callback(null, newMessage);
   },
 
   getChatHistory: (user1, user2, callback) => {
-    const chat = messages.filter(m => 
+    const db = readDB();
+    const history = db.messages.filter(m => 
       (m.sender === user1 && m.receiver === user2) || 
       (m.sender === user2 && m.receiver === user1)
     );
-    callback(null, chat);
+    callback(null, history);
   },
 
   getChatsList: (username, callback) => {
-    const user = users.find(u => u.username === username);
+    const db = readDB();
+    const user = db.users.find(u => u.username === username);
     if (!user) return callback(null, []);
 
-    // Jo log followers ya following mein hain, unki list nikalna
     const connectedUsernames = [...new Set([...user.following, ...user.followers])];
-    const chatUsers = users.filter(u => connectedUsernames.includes(u.username));
-    
+    const chatUsers = db.users.filter(u => connectedUsernames.includes(u.username));
     callback(null, chatUsers);
   }
 };
 
-module.exports = db;
+module.exports = database;
