@@ -1,3 +1,4 @@
+/* Global Reset */
 * {
     margin: 0;
     padding: 0;
@@ -11,6 +12,7 @@ body {
     padding-bottom: 70px;
 }
 
+/* Authentication Screens (Login & Signup) */
 .auth-body {
     display: flex;
     justify-content: center;
@@ -21,7 +23,7 @@ body {
 
 .auth-card {
     background: #000;
-    border: 1px solid #dbdbdb26;
+    border: 1px solid rgba(219, 219, 219, 0.15);
     padding: 40px 30px;
     border-radius: 4px;
     width: 350px;
@@ -75,6 +77,7 @@ body {
     font-weight: 600;
 }
 
+/* Navbar & Bottom Bar */
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -122,6 +125,7 @@ body {
     color: #0095f6;
 }
 
+/* Modals & Overlays */
 .search-modal {
     display: none;
     position: fixed;
@@ -228,6 +232,7 @@ body {
     cursor: pointer;
 }
 
+/* Post Cards */
 .post-card {
     background: #000;
     border: 1px solid #262626;
@@ -298,6 +303,7 @@ body {
     margin-right: 5px;
 }
 
+/* Comments */
 .comments-section {
     padding: 0 15px 12px 15px;
 }
@@ -338,6 +344,7 @@ body {
     cursor: pointer;
 }
 
+/* User Profile */
 .profile-header {
     display: flex;
     align-items: center;
